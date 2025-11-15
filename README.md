@@ -32,24 +32,11 @@ O fluxo de login/cadastro é simulado, levando o usuário para a `Home` (Início
 
 ---
 
-### 3. Principais Alterações de Usabilidade (UX)
-
-As alterações solicitadas foram implementadas para melhorar a coesão visual e funcional:
-
-* **Centralização da Navbar:** O elemento `.bottom-nav` está agora perfeitamente centralizado na largura máxima do aplicativo (480px), garantindo consistência visual.
-* **Remoção de Links "Home":** Todos os links de texto "Home" na `top-bar` das telas secundárias (`screen-history`, `screen-medals`, `screen-ranking`, `screen-profile`) foram removidos, já que a navegação principal é feita pelo ícone "Início" na barra inferior.
-    * **Exceções:**
-        * Em `screen-add-activity`, o link de retorno foi renomeado para **"Cancelar"**.
-        * Em `screen-summary`, o link de retorno foi renomeado para **"Início"** (para confirmar o fluxo de conclusão).
-        * Em `screen-activity-detail`, o link de retorno foi renomeado para **"Voltar"** (para o Histórico).
-
----
-
-### 4. Funcionamento da Gamificação
+### 3. Funcionamento da Gamificação
 
 A gamificação é baseada no registro de atividades, que são convertidas em Pontos de Experiência (XP).
 
-#### 4.1. Cálculo de XP
+#### 3.1. Cálculo de XP
 
 A fórmula de XP (detalhada na tela de Resumo) é:
 
@@ -61,7 +48,7 @@ $$XP = (Tempo_{min} \times Fator_{Tipo} \times Fator_{Intensidade}) + Bônus_{Du
 | **$Fator_{Intensidade}$** | Leve (1.0), Moderada (1.5), Alta (2.0). |
 | **$Bônus_{Duração}$** | +10 XP se o treino for $\ge 30$ minutos. |
 
-#### 4.2. Progressão de Nível
+#### 3.2. Progressão de Nível
 
 O nível é determinado pelo XP Total acumulado:
 
@@ -73,7 +60,7 @@ O nível é determinado pelo XP Total acumulado:
 | **4** | 3.000 XP |
 | **5** | 5.000 XP |
 
-#### 4.3. Medalhas (Conquistas)
+#### 3.3. Medalhas (Conquistas)
 
 As medalhas são desbloqueadas com base em marcos de uso:
 
@@ -88,7 +75,7 @@ As medalhas são desbloqueadas com base em marcos de uso:
 
 ---
 
-### 5. Configuração e Inicialização
+### 4. Configuração e Inicialização
 
 1.  **Acesso:** O código é executado em um navegador.
 2.  **Início:** O aplicativo começa em `screen-onb1`.
