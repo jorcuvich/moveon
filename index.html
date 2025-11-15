@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>MoveOn - Gamificação Fitness</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        /* Variáveis e Reset */
+        :root {
+            --primary: #ff6a00; /* Laranja VIBRANTE */
+            --secondary: #0044ff; /* Azul VIBRANTE */
+            --bg: #f5f5f5;
+            --text: #111111;
+            --card: #ffffff;
+            --border: #e0e0e0;
+            --success: #00a854; /* Para Level Up */
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+        }
+
+        .app {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        /* Estilo Principal */
+        .screen {
+            display: none;
+            padding: 16px;
+            /* Garante que o conteúdo não fique escondido pela barra de navegação fixa */
+            padding-bottom: 80px; 
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1, h2, h3 { margin: 0 0 8px; }
+        p { margin: 0 0 8px; }
+
+        /* Estilos de Botões */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 12px;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+        }
+        .btn-primary:hover { background: #e06000; }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-secondary:hover { background: rgba(255, 106, 0, 0.05); }
+
+        .btn-ghost {
+            background: transparent;
+            border: none;
+            color: var(--secondary);
+            font-size: 14px;
+            text-align: center;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        /* Estilos de Cards e Componentes */
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 16px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05); 
+            border: 1px solid var(--border);
+        }
+        
+        .cardinicio {
+            padding: 0;
+            overflow: hidden;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
+
+        .xp-highlight {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px; 
+        }
+        .top-bar-title { font-size: 22px; font-weight: 700; }
+        .top-bar-link { font-size: 13px; color: var(--secondary); cursor: pointer; }
+
+        .small { font-size: 12px; color: #666666; }
+
+        #inicio { width: 100%; display: block; }
+        
+        .level-up-alert {
+            background: var(--success);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            margin-top: 16px;
+            box-shadow: 0 4px 10px rgba(0, 168, 84, 0.4);
+        }
+        
+        /* Estilos da nova Navbar no Rodapé */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 480px;
+            /* CENTRALIZAÇÃO CORRIGIDA AQUI */
+            left: 50%;
+            transform: translateX(-50%); 
+            /* FIM DA CORREÇÃO DE CENTRALIZAÇÃO */
+            height: 70px;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            padding: 0 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #888888;
+            font-size: 10px;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding: 4px;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-register-btn {
+            background: var(--primary);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(255, 106, 0, 0.5);
+            font-size: 24px;
+            transform: translateY(-5px); /* Efeito de flutuação */
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .nav-register-btn:hover {
+            background: #e06000;
+        }
+        
+        /* Estilos de inputs, chips, XP bar e outros componentes */
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 13px; margin-bottom: 4px; font-weight: 500;}
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cccccc; font-size: 14px;
+        }
+        .chip-row { display: flex; gap: 8px; margin-top: 4px; margin-bottom: 8px; }
+        .chip {
+            padding: 6px 12px; border-radius: 16px; font-size: 13px; border: 1px solid #cccccc; background: #e0e0e0; cursor: pointer; user-select: none; transition: background 0.2s, border-color 0.2s;
+        }
+        .chip.selected { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+        .xp-bar-container { margin-top: 8px; margin-bottom: 4px; width: 100%; }
+        .xp-bar-bg { width: 100%; height: 12px; border-radius: 6px; background: #cccccc; overflow: hidden; }
+        .xp-bar-fill { height: 100%; width: 40%; background: var(--primary); border-radius: 6px; transition: width 0.3s; }
+        .shortcut-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .shortcut-card {
+            background: var(--card); border-radius: 16px; padding: 12px; border: 1px solid var(--border); text-align: left; font-size: 14px; cursor: pointer; transition: box-shadow 0.2s;
+        }
+        .activity-list { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+        .activity-card-content { display: flex; justify-content: space-between; align-items: center; }
+        .activity-title { font-size: 14px; font-weight: 600; }
+        .activity-meta { font-size: 12px; color: #666666; margin-top: 2px; }
+        .xp-highlight { font-size: 16px; flex-shrink: 0; margin-left: 10px; }
+        .badges-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+        .badge { text-align: center; font-size: 11px; }
+        .badge-circle {
+            width: 72px; height: 72px; margin: 0 auto 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #eeeeee; color: #888888; font-size: 12px; font-weight: 700;
+        }
+        .badge.unlocked .badge-circle { background: var(--primary); color: #ffffff; }
+        .ranking-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .ranking-item {
+            display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 12px; padding: 10px 16px; border: 1px solid var(--border); font-size: 14px;
+        }
+        .ranking-me { border-color: var(--primary); background: #fff8f5; }
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app">
+
+        <section id="screen-onb1" class="screen active">
+            <h1>MoveOn</h1>
+            <h2>Transforme seus treinos em progresso visível</h2>
+            <p>Registre o que você já faz de atividade física e veja tudo virar XP, níveis e conquistas.</p>
+            <div class="cardinicio" style="margin-top:24px; text-align:center;">
+                <img id="inicio" src="pessoas.jpg" alt="">
+            </div>
+            <button class="btn btn-primary" onclick="goTo('screen-onb2')">Continuar</button>
+        </section>
+
+        <section id="screen-onb2" class="screen">
+            <h2>Como o MoveOn funciona</h2>
+            <p>Você registra cada atividade com tipo, tempo e intensidade.</p>
+            <p>O aplicativo converte isso em XP usando uma fórmula simples e transparente.</p>
+            <p>Você sobe de nível, desbloqueia medalhas e entra no ranking.</p>
+            <p class="small">Sem metas obrigatórias. Só reconhecimento do seu esforço.</p>
+
+            <button class="btn btn-primary" onclick="goTo('screen-signup')">Criar conta</button>
+            <button class="btn btn-secondary" onclick="goTo('screen-login')">Já tenho conta</button>
+        </section>
+
+        <section id="screen-login" class="screen">
+            <h2>Entrar</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label for="login-email">Email</label>
+                    <input id="login-email" type="email" required placeholder="seuemail@exemplo.com" />
+                </div>
+                <div class="input-group">
+                    <label for="login-senha">Senha</label>
+                    <input id="login-senha" type="password" required placeholder="Sua senha" />
+                </div>
+                <button class="btn btn-primary" type="submit">Entrar</button>
+            </form>
+            <button class="btn-ghost" onclick="goTo('screen-signup')">Criar conta</button>
+        </section>
+
+        <section id="screen-signup" class="screen">
+            <h2>Criar conta</h2>
+            <form onsubmit="handleSignup(event)">
+                <div class="input-group">
+                    <label for="signup-nome">Nome</label>
+                    <input id="signup-nome" type="text" required placeholder="Como você quer ser chamado" />
+                </div>
+                <div class="input-group">
+                    <label for="signup-email">Email</label>
+                    <input id="signup-email" type="email" required placeholder="seuemail@exemplo.com" />
+                </div>
+                <div class="input-group">
+                    <label for="signup-senha">Senha</label>
+                    <input id="signup-senha" type="password" required placeholder="Crie uma senha" />
+                </div>
+                <button class="btn btn-primary" type="submit">Criar conta</button>
+            </form>
+            <button class="btn-ghost" onclick="goTo('screen-login')">Já tenho conta</button>
+        </section>
+        
+        <section id="screen-home" class="screen">
+            <div class="top-bar">
+                <div>
+                    <div class="small">Bem vindo</div>
+                    <div class="top-bar-title" id="home-username">Atleta</div>
+                </div>
+                <div class="top-bar-link" onclick="goTo('screen-profile')"><i class="fas fa-user-circle" style="font-size:24px;"></i></div>
+            </div>
+
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div class="small">Seu nível atual</div>
+                        <h2 id="home-level" style="margin-bottom:0;">Nível 1</h2>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="small">XP total</div>
+                        <div id="home-xp-total" class="xp-highlight">0 XP</div>
+                    </div>
+                </div>
+                <div class="xp-bar-container">
+                    <div class="xp-bar-bg">
+                        <div id="home-xp-bar" class="xp-bar-fill" style="width:0%;"></div>
+                    </div>
+                </div>
+                <div class="small" id="home-xp-next">0 de 500 XP para o próximo nível</div>
+            </div>
+
+            <button class="btn btn-secondary" style="margin-top:16px;" onclick="goTo('screen-add-activity')">
+                Registrar nova atividade (Alternativa)
+            </button>
+
+            <h3 style="margin-top:24px; margin-bottom:4px;">Atividades Recentes</h3>
+            <div id="home-activity-list" class="activity-list small">
+                <p class="small">Nenhuma atividade registrada ainda.</p>
+            </div>
+            
+            <h3 style="margin-top:24px; margin-bottom:4px;">Recursos</h3>
+            <div class="shortcut-grid">
+                <div class="shortcut-card" onclick="goTo('screen-map')">
+                    <div class="shortcut-title">Mapa</div>
+                    <div class="shortcut-sub">Rotas e eventos (Em Breve)</div>
+                </div>
+                <div class="shortcut-card" onclick="goTo('screen-profile')">
+                    <div class="shortcut-title">Perfil</div>
+                    <div class="shortcut-sub">Suas estatísticas e conta</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-add-activity" class="screen">
+            <div class="top-bar">
+                <div class="top-bar-title">Registrar atividade</div>
+                <div class="top-bar-link" onclick="goTo('screen-home')">Cancelar</div>
+            </div>
+            <p class="small">Preencha os campos e veja quanto XP você ganha.</p>
+
+            <form onsubmit="handleAddActivity(event)">
+                <div class="input-group">
+                    <label for="act-type">Tipo de atividade</label>
+                    <select id="act-type" required>
+                        <option value="">Selecione</option>
+                        <option value="cardio">Cardio (Corrida, Ciclismo, etc.)</option>
+                        <option value="musculacao">Musculação (Pesos, Força)</option>
+                        <option value="funcional">Funcional (Crossfit, Treino em circuito)</option>
+                        <option value="outro">Outro (Ioga, Alongamento, etc.)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="act-time">Tempo total (minutos)</label>
+                    <input id="act-time" type="number" min="1" required placeholder="Exemplo: 40" />
+                </div>
+
+                <div class="input-group">
+                    <label>Intensidade</label>
+                    <div class="chip-row">
+                        <div class="chip" data-intensity="leve" onclick="selectIntensity(this)">Leve</div>
+                        <div class="chip" data-intensity="moderada" onclick="selectIntensity(this)">Moderada</div>
+                        <div class="chip" data-intensity="alta" onclick="selectIntensity(this)">Alta</div>
+                    </div>
+                    <input type="hidden" id="act-intensity" required />
+                </div>
+
+                <div class="input-group">
+                    <label for="act-notes">Notas (opcional)</label>
+                    <textarea id="act-notes" placeholder="Exemplo: treino de pernas, fiz agachamento pesado."></textarea>
+                </div>
+
+                <button class="btn btn-primary" type="submit">Salvar e calcular XP</button>
+            </form>
+        </section>
+
+        <section id="screen-summary" class="screen">
+            <div class="top-bar">
+                <div class="top-bar-title">Atividade registrada</div>
+                <div class="top-bar-link" onclick="goTo('screen-home')">Início</div>
+            </div>
+            
+            <div id="level-up-message" class="level-up-alert" style="display:none;">
+                🎉 VOCÊ SUBIU DE NÍVEL! 🎉
+            </div>
+
+            <div class="card" style="margin-top: 16px;">
+                <h3 id="sum-title">Atividade</h3>
+                <p class="small" id="sum-meta"></p>
+                <hr style="border:none; border-top:1px solid #eeeeee; margin:12px 0;" />
+                <p class="small">Fórmula de XP utilizada:</p>
+                <p class="small">XP = (tempo × fatorTipo × fatorIntensidade) + BônusDuração</p>
+                <p class="small" id="sum-formula"></p>
+                <p style="margin-top:12px;">
+                    <span class="xp-highlight" id="sum-xp" style="font-size:24px;"></span>
+                </p>
+                <p class="small" id="sum-msg"></p>
+            </div>
+
+            <button class="btn btn-primary" style="margin-top:16px;" onclick="goTo('screen-home')">
+                Continuar
+            </button>
+        </section>
+        
+        <section id="screen-activity-detail" class="screen">
+            <div class="top-bar">
+                <div class="top-bar-title">Detalhes do Treino</div>
+                <div class="top-bar-link" onclick="goTo('screen-history')">Voltar</div>
+            </div>
+            <div class="card">
+                <h3 id="detail-title"></h3>
+                <p class="small">Data: <span id="detail-date"></span></p>
+                <p class="small">Duração: <span id="detail-time"></span></p>
+                <p class="small">Intensidade: <span id="detail-intensity"></span></p>
+                <p style="margin-top: 12px;">**Notas:**</p>
+                <p class="small" id="detail-notes"></p>
+                
+                <hr style="border:none; border-top:1px solid #eeeeee; margin:16px 0;" />
+                
+                <p>
+                    <span class="xp-highlight" id="detail-xp" style="font-size: 20px;"></span>
+                </p>
+                <p class="small">Cálculo detalhado:</p>
+                <p class="small" id="detail-formula-breakdown"></p>
+            </div>
+        </section>
+
+        <section id="screen-history" class="screen">
+            <div class="top-bar">
+                <div class="top-bar-title">Histórico</div>
+                </div>
+            <p class="small">Veja as atividades já registradas. Clique para ver detalhes.</p>
+
+            <div id="history-list" class="activity-list small" style="margin-top:12px;">
+                <p class="small">Nenhuma atividade registrada ainda.</p>
+            </div>
+        </section>
+
+        <section id="screen-medals" class="screen">
+            <div class="top-bar">
+                <div class="top-bar-title">Medalhas</div>
+                </div>
+            <p class="small">Conquistas que reconhecem seu esforço.</p>
+
+            <div id="medals-grid" class="badges-grid">
+                </div>
+        </section>
+
+        <section id="screen-ranking" class="screen">
+            <div class="top-bar">
+                <div class="top-bar-title">Ranking Global</div>
+                </div>
+            <p class="small">Veja como seu XP se compara com outros usuários.</p>
+
+            <div id="ranking-list" class="ranking-list">
+                </div>
+        </section>
+
+        <section id="screen-map" class="screen">
+            <div class="top-bar">
+                <div class="top-bar-title">Mapa e eventos</div>
+                <div class="top-bar-link" onclick="goTo('screen-home')">Voltar</div>
+            </div>
+            <div class="card">
+                <h3>Em breve</h3>
+                <p class="small">
+                    Aqui você verá um mapa com rotas de treino e eventos próximos recomendados para você.
+                </p>
+                <p class="small">
+                    Esta funcionalidade faz parte da fase 2 do MoveOn e ainda não está ativa neste MVP.
+                </p>
+            </div>
+        </section>
+
+        <section id="screen-profile" class="screen">
+            <div class="top-bar">
+                <div class="top-bar-title">Perfil do Atleta</div>
+                </div>
+            <div class="card">
+                <p class="small">Nome de Usuário</p>
+                <p id="profile-name" style="font-weight: 600; margin-bottom: 12px;">Usuário</p>
+                <p class="small">Email de Contato</p>
+                <p id="profile-email" style="font-weight: 600; margin-bottom: 12px;">email@exemplo.com</p>
+                <p class="small">XP Acumulado Total</p>
+                <p id="profile-xp" style="font-weight: 600;" class="xp-highlight">0 XP</p>
+            </div>
+            <button class="btn btn-secondary" style="margin-top:16px;" onclick="resetApp()">
+                Sair e limpar dados
+            </button>
+        </section>
+
+    </div>
+
+    <nav class="bottom-nav" id="bottom-nav">
+        <div class="nav-item active" data-screen="screen-home" onclick="handleNavClick(this, 'screen-home')">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </div>
+        <div class="nav-item" data-screen="screen-history" onclick="handleNavClick(this, 'screen-history')">
+            <i class="fas fa-history"></i>
+            <span>Histórico</span>
+        </div>
+        <div class="nav-register-btn" data-screen="screen-add-activity" onclick="handleNavClick(this, 'screen-add-activity')">
+            <i class="fas fa-plus"></i>
+        </div>
+        <div class="nav-item" data-screen="screen-ranking" onclick="handleNavClick(this, 'screen-ranking')">
+            <i class="fas fa-trophy"></i>
+            <span>Ranking</span>
+        </div>
+        <div class="nav-item" data-screen="screen-medals" onclick="handleNavClick(this, 'screen-medals')">
+            <i class="fas fa-medal"></i>
+            <span>Medalhas</span>
+        </div>
+    </nav>
+    <script>
+        // Estado simples do aplicativo
+        const state = {
+            userName: "Atleta",
+            userEmail: "",
+            xpTotal: 0,
+            level: 1,
+            activities: [],
+            lastActivity: null,
+            initialLoad: true
+        };
+
+        // Faixas de nível: XP total necessário acumulado
+        const levelThresholds = [
+            0,    // nível 1
+            500,  // nível 2
+            1500, // nível 3
+            3000, // nível 4
+            5000  // nível 5
+        ];
+
+        // Função utilitária para navegação
+        function goTo(id) {
+            document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+            const screen = document.getElementById(id);
+            if (screen) {
+                screen.classList.add("active");
+            }
+            // Atualizações quando entra em algumas telas
+            if (id === "screen-home") {
+                renderHome();
+            } else if (id === "screen-history") {
+                renderHistory();
+            } else if (id === "screen-medals") {
+                renderMedals();
+            } else if (id === "screen-ranking") {
+                renderRanking();
+            } else if (id === "screen-profile") {
+                renderProfile();
+            }
+            
+            // Lógica para controle da barra de navegação
+            updateNavBar(id);
+        }
+        
+        // NOVO: Atualiza o estado visual da barra de navegação
+        function updateNavBar(currentScreenId) {
+            const navItems = document.querySelectorAll('.bottom-nav .nav-item, .bottom-nav .nav-register-btn');
+            const navBar = document.getElementById('bottom-nav');
+
+            const isProtectedScreen = ['screen-onb1', 'screen-onb2', 'screen-login', 'screen-signup'].includes(currentScreenId);
+            
+            // Oculta a navbar em telas de login/cadastro/onboarding
+            navBar.style.display = isProtectedScreen ? 'none' : 'flex';
+
+            if (isProtectedScreen) return;
+            
+            navItems.forEach(item => {
+                const screenId = item.getAttribute('data-screen');
+                item.classList.remove('active');
+                
+                // O botão central de registro tem sua própria lógica de ativação
+                if (item.classList.contains('nav-register-btn')) {
+                    if (currentScreenId === screenId) {
+                        item.classList.add('active');
+                    }
+                } else {
+                    // Botões de navegação principal
+                    if (screenId === currentScreenId) {
+                        item.classList.add('active');
+                    }
+                }
+            });
+        }
+        
+        // NOVO: Função chamada pelos cliques na barra de navegação
+        function handleNavClick(el, targetScreenId) {
+            // Remove 'active' de todos os itens de navegação .nav-item
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => item.classList.remove('active'));
+            
+            // Remove 'active' do botão central (exceto se for para ele)
+            const registerBtn = document.querySelector('.bottom-nav .nav-register-btn');
+            registerBtn.classList.remove('active');
+            
+            // Adiciona a classe 'active' ao elemento clicado (ou ao item principal se for o registro)
+            if (el.classList.contains('nav-register-btn')) {
+                el.classList.add('active');
+            } else {
+                el.classList.add('active');
+            }
+            
+            goTo(targetScreenId);
+        }
+
+        // Funções de Autenticação (simuladas)
+        function handleSignup(event) {
+            event.preventDefault();
+            const nome = document.getElementById("signup-nome").value.trim();
+            const email = document.getElementById("signup-email").value.trim();
+            state.userName = nome || "Atleta";
+            state.userEmail = email;
+            state.xpTotal = 0;
+            state.level = 1;
+            state.activities = [];
+            state.lastActivity = null;
+            goTo("screen-home");
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById("login-email").value.trim();
+            if (state.userName === "Atleta" && state.userEmail === "") {
+                 state.userEmail = email || "";
+            }
+            goTo("screen-home");
+        }
+
+        // Função para seleção de intensidade
+        function selectIntensity(chipElement) {
+            document.querySelectorAll("#screen-add-activity .chip").forEach(c => {
+                c.classList.remove("selected");
+            });
+            chipElement.classList.add("selected");
+            const intensity = chipElement.getAttribute("data-intensity");
+            document.getElementById("act-intensity").value = intensity;
+        }
+
+        // Manipulação de Registro de Atividade
+        function handleAddActivity(event) {
+            event.preventDefault();
+            const type = document.getElementById("act-type").value;
+            const time = Number(document.getElementById("act-time").value);
+            const intensity = document.getElementById("act-intensity").value;
+            const notes = document.getElementById("act-notes").value.trim();
+
+            if (!type || !time || !intensity) {
+                alert("Preencha tipo, tempo e intensidade.");
+                return;
+            }
+
+            const oldLevel = state.level;
+            const xpCalc = calculateXP(type, time, intensity);
+            const activity = {
+                id: Date.now(),
+                type,
+                time,
+                intensity,
+                notes,
+                date: new Date(),
+                xp: xpCalc.xp,
+                factors: xpCalc
+            };
+
+            state.activities.unshift(activity);
+            state.xpTotal += xpCalc.xp;
+            
+            updateLevel();
+            
+            activity.levelUp = state.level > oldLevel;
+            state.lastActivity = activity;
+
+            document.getElementById("act-type").value = "";
+            document.getElementById("act-time").value = "";
+            document.getElementById("act-intensity").value = "";
+            document.getElementById("act-notes").value = "";
+            document.querySelectorAll("#screen-add-activity .chip").forEach(c => c.classList.remove("selected"));
+
+            renderSummary();
+            goTo("screen-summary");
+        }
+
+        // Cálculo de XP (Aprimorado)
+        function calculateXP(type, time, intensity) {
+            let fatorTipo = 1.0;
+            if (type === "cardio") fatorTipo = 1.2;
+            if (type === "musculacao") fatorTipo = 1.5;
+            if (type === "funcional") fatorTipo = 1.3;
+
+            let fatorIntensidade = 1.0;
+            if (intensity === "moderada") fatorIntensidade = 1.5;
+            if (intensity === "alta") fatorIntensidade = 2.0;
+            
+            const bonusDuracao = time >= 30 ? 10 : 0;
+
+            const xp = Math.round((time * fatorTipo * fatorIntensidade) + bonusDuracao);
+
+            return {
+                xp,
+                fatorTipo,
+                fatorIntensidade,
+                time,
+                bonusDuracao
+            };
+        }
+
+        // Atualização de Nível
+        function updateLevel() {
+            const xp = state.xpTotal;
+            let lvl = 1;
+            for (let i = levelThresholds.length - 1; i >= 0; i--) {
+                if (xp >= levelThresholds[i]) {
+                    lvl = i + 1;
+                    break;
+                }
+            }
+            state.level = lvl;
+        }
+
+        // Renderização da Home
+        function renderHome() {
+            document.getElementById("home-username").textContent = state.userName || "Atleta";
+            document.getElementById("home-xp-total").textContent = state.xpTotal + " XP";
+            document.getElementById("home-level").textContent = "Nível " + state.level;
+
+            const currentLevelIndex = state.level - 1;
+            const currentThreshold = levelThresholds[currentLevelIndex] || 0;
+            const nextThreshold = levelThresholds[currentLevelIndex + 1] || (currentThreshold + 2000);
+            const xpInLevel = state.xpTotal - currentThreshold;
+            const xpRange = nextThreshold - currentThreshold;
+            const percent = Math.max(0, Math.min(100, (xpInLevel / xpRange) * 100));
+
+            const bar = document.getElementById("home-xp-bar");
+            bar.style.width = percent + "%";
+            
+            const nextLevelMsg = state.level < levelThresholds.length
+                ? xpInLevel + " de " + xpRange + " XP para o próximo nível"
+                : "Parabéns! Nível máximo alcançado.";
+                
+            document.getElementById("home-xp-next").textContent = nextLevelMsg;
+
+            const list = document.getElementById("home-activity-list");
+            list.innerHTML = "";
+            if (state.activities.length === 0) {
+                const p = document.createElement("p");
+                p.className = "small";
+                p.textContent = "Nenhuma atividade registrada ainda.";
+                list.appendChild(p);
+            } else {
+                state.activities.slice(0, 3).forEach(act => {
+                    list.appendChild(createActivityCard(act, true));
+                });
+            }
+        }
+        
+        // Renderização do Resumo (após registro)
+        function renderSummary() {
+            const act = state.lastActivity;
+            if (!act) return;
+
+            const levelUpEl = document.getElementById("level-up-message");
+            if (act.levelUp) {
+                levelUpEl.textContent = `🎉 VOCÊ SUBIU PARA O NÍVEL ${state.level}! 🎉`;
+                levelUpEl.style.display = 'block';
+            } else {
+                levelUpEl.style.display = 'none';
+            }
+
+            document.getElementById("sum-title").textContent = getEmoji(act.type) + " " + formatActivityType(act.type);
+            document.getElementById("sum-meta").textContent =
+                act.time + " min · Intensidade " + act.intensity + (act.notes ? " · " + act.notes : "");
+            
+            const f = act.factors;
+            let formulaString = 
+                "(" + f.time + " × " + f.fatorTipo.toFixed(1) + " × " + f.fatorIntensidade.toFixed(1) + ") ";
+            
+            if(f.bonusDuracao > 0) {
+                 formulaString += " + Bônus (" + f.bonusDuracao + " XP)";
+            }
+            
+            document.getElementById("sum-formula").textContent = formulaString;
+            
+            document.getElementById("sum-xp").textContent = "+" + act.xp + " XP ganhos";
+            document.getElementById("sum-msg").textContent =
+                "Parabéns, seu esforço foi registrado. Continue acumulando XP para subir de nível e desbloquear medalhas.";
+        }
+
+        // Criação de Card de Atividade
+        function createActivityCard(act, clickable = false) {
+             const card = document.createElement("div");
+             card.className = "card";
+             card.innerHTML = `
+                 <div class="activity-card-content">
+                     <div class="activity-info">
+                         <div class="activity-title">${getEmoji(act.type)} ${formatActivityType(act.type)}</div>
+                         <div class="activity-meta">${formatDate(act.date)} &bull; ${act.time} min &bull; ${formatIntensity(act.intensity)}</div>
+                     </div>
+                     <span class="xp-highlight">
+                         +${act.xp} XP
+                     </span>
+                 </div>
+             `;
+             
+             if (clickable) {
+                 card.style.cursor = 'pointer';
+                 card.onclick = () => renderActivityDetail(act.id);
+             }
+             
+             return card;
+        }
+
+        // Renderização do Histórico
+        function renderHistory() {
+            const container = document.getElementById("history-list");
+            container.innerHTML = "";
+            if (state.activities.length === 0) {
+                const p = document.createElement("p");
+                p.className = "small";
+                p.textContent = "Nenhuma atividade registrada ainda.";
+                container.appendChild(p);
+                return;
+            }
+            state.activities.forEach(act => {
+                container.appendChild(createActivityCard(act, true));
+            });
+        }
+        
+        // Renderização do Detalhe da Atividade
+        function renderActivityDetail(activityId) {
+            const act = state.activities.find(a => a.id === activityId);
+            if (!act) return goTo('screen-history');
+            
+            document.getElementById("detail-title").textContent = getEmoji(act.type) + " " + formatActivityType(act.type);
+            document.getElementById("detail-date").textContent = formatDate(act.date, true);
+            document.getElementById("detail-time").textContent = act.time + " minutos";
+            document.getElementById("detail-intensity").textContent = formatIntensity(act.intensity);
+            document.getElementById("detail-notes").textContent = act.notes || "Nenhuma nota adicionada.";
+            document.getElementById("detail-xp").textContent = `+${act.xp} XP Ganhos`;
+
+            const f = act.factors;
+            const formulaBreakdown = `
+                • Duração (Min): ${f.time} <br>
+                • Fator Tipo (${formatActivityType(act.type)}): ${f.fatorTipo.toFixed(1)} <br>
+                • Fator Intensidade (${formatIntensity(act.intensity)}): ${f.fatorIntensidade.toFixed(1)} <br>
+                • Bônus Duração (>30min): ${f.bonusDuracao} XP <br>
+                • **Cálculo:** (${f.time} x ${f.fatorTipo.toFixed(1)} x ${f.fatorIntensidade.toFixed(1)}) + ${f.bonusDuracao} = ${act.xp} XP
+            `;
+            document.getElementById("detail-formula-breakdown").innerHTML = formulaBreakdown;
+            
+            goTo('screen-activity-detail');
+        }
+
+
+        // Função para checar o estado das medalhas
+        function getMedalsState() {
+            const acts = state.activities;
+            const medals = {
+                primeira: false,
+                seteDias: false,
+                minutos300: false,
+                xp1000: false,
+                multi: false,
+                alta5: false,
+                cardio5: false,
+                musculacao5: false
+            };
+
+            if (acts.length > 0) medals.primeira = true;
+
+            const totalMinutos = acts.reduce((acc, a) => acc + a.time, 0);
+            if (totalMinutos >= 300) medals.minutos300 = true;
+
+            if (state.xpTotal >= 1000) medals.xp1000 = true;
+
+            const tiposUsados = new Set(acts.map(a => a.type));
+            if (tiposUsados.size >= 3) medals.multi = true;
+
+            const altaCount = acts.filter(a => a.intensity === "alta").length;
+            if (altaCount >= 5) medals.alta5 = true;
+            
+            const cardioCount = acts.filter(a => a.type === "cardio").length;
+            if (cardioCount >= 5) medals.cardio5 = true;
+            
+            const musculacaoCount = acts.filter(a => a.type === "musculacao").length;
+            if (musculacaoCount >= 5) medals.musculacao5 = true;
+
+            const diasComAtividade = new Set(
+                acts.map(a => new Date(a.date).toDateString())
+            );
+            if (diasComAtividade.size >= 7) medals.seteDias = true;
+
+            return medals;
+        }
+
+        // Renderização das Medalhas
+        function renderMedals() {
+            const medals = getMedalsState();
+            const container = document.getElementById("medals-grid");
+            container.innerHTML = "";
+
+            const lista = [
+                { id: "primeira", titulo: "Primeira Atividade", desc: "Você registrou o primeiro treino." },
+                { id: "seteDias", titulo: "Hábito", desc: "Atividades em 7 dias diferentes." },
+                { id: "minutos300", titulo: "Maratona", desc: "Acumulou 300 minutos de treino." },
+                { id: "xp1000", titulo: "Mil XP", desc: "Alcançou 1000 XP no total." },
+                { id: "multi", titulo: "Versatilidade", desc: "Registrou 3 ou mais tipos de atividade." },
+                { id: "cardio5", titulo: "Cardio King", desc: "5 atividades de Cardio registradas." },
+                { id: "musculacao5", titulo: "Powerlifter", desc: "5 atividades de Musculação registradas." },
+                { id: "alta5", titulo: "Alta Performance", desc: "5 atividades de Alta Intensidade." }
+            ];
+
+            lista.forEach(def => {
+                const unlocked = medals[def.id];
+                const badge = document.createElement("div");
+                badge.className = "badge" + (unlocked ? " unlocked" : "");
+
+                const circle = document.createElement("div");
+                circle.className = "badge-circle";
+                circle.textContent = unlocked ? def.titulo.split(' ')[0] : "?"; 
+
+                const title = document.createElement("div");
+                title.className = "badge-title";
+                title.textContent = def.titulo;
+
+                const desc = document.createElement("div");
+                desc.className = "badge-desc";
+                desc.textContent = def.desc;
+
+                badge.appendChild(circle);
+                badge.appendChild(title);
+                badge.appendChild(desc);
+                container.appendChild(badge);
+            });
+        }
+
+        // Renderização do Ranking
+        function renderRanking() {
+            const basePlayers = [
+                { name: "Ana (Beta)", xp: 3200 },
+                { name: "Bruno (Beta)", xp: 2700 },
+                { name: "Carla (Beta)", xp: 2200 },
+                { name: "Diego (Beta)", xp: 1800 },
+                { name: "Eduarda (Beta)", xp: 1500 }
+            ];
+
+            const me = {
+                name: state.userName || "Você",
+                xp: state.xpTotal
+            };
+
+            const players = [...basePlayers, me];
+            players.sort((a, b) => b.xp - a.xp);
+
+            const container = document.getElementById("ranking-list");
+            container.innerHTML = "";
+
+            players.forEach((p, index) => {
+                const item = document.createElement("div");
+                item.className = "ranking-item";
+                if (p === me) {
+                    item.classList.add("ranking-me");
+                }
+                const pos = document.createElement("div");
+                pos.className = "ranking-pos";
+                pos.textContent = "#" + (index + 1);
+                const name = document.createElement("div");
+                name.className = "ranking-name";
+                name.textContent = p.name;
+                const xp = document.createElement("div");
+                xp.className = "ranking-xp";
+                xp.textContent = p.xp + " XP";
+
+                item.appendChild(pos);
+                item.appendChild(name);
+                item.appendChild(xp);
+                container.appendChild(item);
+            });
+        }
+
+        // Renderização do Perfil
+        function renderProfile() {
+            document.getElementById("profile-name").textContent = state.userName || "Usuário";
+            document.getElementById("profile-email").textContent =
+                state.userEmail || "email não informado";
+            document.getElementById("profile-xp").textContent = state.xpTotal + " XP";
+        }
+
+        // Reset do aplicativo (Sair e Limpar Dados)
+        function resetApp() {
+            if (!confirm("Tem certeza que deseja sair e limpar os dados deste MVP? O progresso será perdido.")) return;
+            state.userName = "Atleta";
+            state.userEmail = "";
+            state.xpTotal = 0;
+            state.level = 1;
+            state.activities = [];
+            state.lastActivity = null;
+            goTo("screen-onb1");
+        }
+
+        // Funções de formatação
+        function formatActivityType(type) {
+            if (type === "cardio") return "Cardio";
+            if (type === "musculacao") return "Musculação";
+            if (type === "funcional") return "Funcional";
+            if (type === "outro") return "Outro";
+            return type;
+        }
+        
+        function formatIntensity(intensity) {
+            return intensity.charAt(0).toUpperCase() + intensity.slice(1);
+        }
+        
+        function getEmoji(type) {
+             if (type === "cardio") return "🏃";
+             if (type === "musculacao") return "💪";
+             if (type === "funcional") return "🤸";
+             if (type === "outro") return "🧘";
+             return "✨";
+        }
+
+        function formatDate(date, full = false) {
+            const d = new Date(date);
+            const dia = String(d.getDate()).padStart(2, "0");
+            const mes = String(d.getMonth() + 1).padStart(2, "0");
+            if (full) {
+                 const ano = d.getFullYear();
+                 return `${dia}/${mes}/${ano}`;
+            }
+            return dia + "/" + mes;
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+             // Inicia na tela de Onboarding/Login e esconde a navbar
+             updateNavBar('screen-onb1');
+             renderHome();
+        });
+    </script>
+</body>
+</html>
